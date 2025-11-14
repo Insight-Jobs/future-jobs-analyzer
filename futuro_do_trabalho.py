@@ -15,7 +15,7 @@ headers = {
 }
 
 
-def obter_tendencias_vagas ():
+def obter_tendencias_vagas (termo_busca):
     """
     Faz uma requisição para a API JSearch (RapidAPI)
     e retorna uma lista de dicionários padronizados.
@@ -24,7 +24,7 @@ def obter_tendencias_vagas ():
     url = "https://jsearch.p.rapidapi.com/search"
 
     querystring = {
-       "query": "desenvolvedor",
+       "query": termo_busca,
         "page": "1",
         "num_pages": "1",
         "country": "br"
@@ -62,17 +62,32 @@ def obter_tendencias_vagas ():
 
 
 
-def filtrar_vagas(lista_vagas):
+def filtrar_vagas(lista_vagas, termo_filtro):
     """
-Recebe a lista de profissões e retorna somente
-as consideradas promissoras.
-Vocês definem o critério.
-"""
+    Recebe a lista de profissões e retorna somente
+    as consideradas promissoras.
+    Vocês definem o critério.
+    """
+    vagas_filtradas=[]
+    termo = termo_filtro.lower()
+
+    for vaga in lista_vagas:
+        titulo = str(vaga["titulo"]).lower()
+        empresa = str(vaga["empresa"]).lower()
+        local = str(vaga["local"]).lower()
+
+        if termo in titulo or termo in empresa or termo in local:
+            vagas_filtradas.append(vaga)
+
+    return vagas_filtradas
 
 # TODO: definir critério de filtro e retornar nova lista
 # Exemplo de lógica:
-# return [p for p in lista_profissoes if p["crescimento"] > 5]
-pass
+# return [p for p in lista_vagas if p["crescimento"] > 5]
+
+    
+
+        
 
 
 
@@ -92,7 +107,7 @@ def calcular_crescimento_total(profissoes):
 
 
 
-def exibir_profissoes(lista_profissoes):
+def exibir_vagas(lista_profissoes):
     """
     Exibe, no console, as profissões e suas informações.
     """
@@ -114,23 +129,18 @@ def main ():
     print("\n=== FUTURO DO TRABALHO - GLOBAL SOLUTION ===\n")
 
     # 1. Obter dados da API
-    profissoes = obter_tendencias_emprego()
+    termo_busca = input("Digite o que deseja buscar (ex: developer, data analyst, nurse): ")
 
-    # 2. Perguntar ao usuário
-    termo = input("Digite uma profissão para buscar: ")
+    vagas = obter_tendencias_vagas()
 
-    # (Vocês podem usar esse termo para fazer outra busca
-    # ou só para mostrar resultados que combinem com o termo)
+    print(f"\nForam encontradas {len(vagas)} vagas.")
 
-    # 3. Filtrar profissões
-    filtradas = filtrar_profissoes(profissoes)
+    termo_filtro = input("Digite um termo para filtrar os resultados (ou deixe vazio para não filtrar): ")
+    if termo_filtro.strip() != "":
+            vagas = filtrar_vagas(vagas, termo_filtro)
 
-    # 4. Exibir informações
-    exibir_profissoes(filtradas)
-
-    # 5. Calcular crescimento total
-    total = calcular_crescimento_total(filtradas)
-    print("Crescimento total das profissões filtradas:", total)
+    print(f"\nVagas após filtro: {len(vagas)}\n")
+    exibir_vagas(vagas)
 
 if __name__ == '__main__':
     main()
