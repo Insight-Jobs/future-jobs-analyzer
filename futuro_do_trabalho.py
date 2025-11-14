@@ -6,8 +6,6 @@ import os
 
 load_dotenv()
 
-conn = http.client.HTTPSConnection("jsearch.p.rapidapi.com")
-
 API_KEY = os.getenv('rapidapi-key')
 API_HOST = os.getenv('rapidapi-host')
 
@@ -17,67 +15,46 @@ headers = {
 }
 
 
-conn.request("GET", "/search?query=developer%20jobs%20in%20chicago&page=1&num_pages=1&country=us&date_posted=all", headers=headers)
-
-res = conn.getresponse()
-data = res.read()
-
-print(data.decode("utf-8"))
-
-
 def obter_tendencias_vagas ():
     """
     Faz uma requisição para a API JSearch (RapidAPI)
     e retorna uma lista de dicionários padronizados.
     """
 
-    url = API_HOST
+    url = "https://jsearch.p.rapidapi.com/search"
 
-    # TODO 2: Configurar os parâmetros da requisição
-    # Esses parâmetros definem o termo buscado, país etc.
     querystring = {
-        # "query": "developer",   # exemplo de busca
-        # Você vai decidir o termo que vai usar
-    }
-
-    # TODO 3: Colocar os headers obrigatórios da RapidAPI
-    headers = {
-        "x-rapidapi-key": "SUA_CHAVE_AQUI",
-        "x-rapidapi-host": "jsearch.p.rapidapi.com"
+       "query": "desenvolvedor",
+        "page": "1",
+        "num_pages": "1",
+        "country": "br"
     }
 
     try:
-        # TODO 4: Fazer a requisição usando requests.get()
-        # Exemplo:
-        # response = requests.get(url, headers=headers, params=querystring)
-        pass
+        response = requests.get(url, headers=headers, params=querystring)
+        
 
-        # TODO 5: Converter resposta para JSON
-        # dados = response.json()
+        dados = response.json()
 
-        # TODO 6: Acessar a lista de resultados dentro do JSON
-        # A JSearch normalmente retorna dentro do campo "data"
-        # lista_profissoes = dados["data"]
+        lista_vagas = dados["data"]
 
-        # TODO 7: Padronizar cada profissão em um novo dicionário
-        # com os campos que VOCÊS definiram no planejamento.
-        profissões_formatadas = []
+        vagas_formatadas = []
 
-        # Laço para percorrer os resultados:
-        # for item in lista_profissoes:
-        #     profissao = {
-        #         "titulo": item.get("job_title"),
-        #         "empresa": item.get("employer_name"),
-        #         "local": item.get("job_city"),
-        #
-        #         # ATENÇÃO: A API NÃO TEM taxa de crescimento!
-        #         # VOCÊS precisam criar uma lógica para gerar esse valor.
-        #         "crescimento": ???  
-        #     }
-        #
-        #     profissões_formatadas.append(profissao)
+        for item in lista_vagas:
+            vaga ={
+                 "titulo": item.get("job_title"),
+                 "empresa": item.get("employer_name"),
+                 "local": item.get("job_city"),
+                 "plataforma": item.get("publisher"),
+                 "modalidade": item.get("job_is_remote"),
+                 "salario": item.get ("job_salary", "Não informado"),
+                 "tipo de carga horaria": item.get("job_employment_type"),
+                 "beneficios": item.get ("Benefits")
+            } 
 
-        # return profissões_formatadas
+            vagas_formatadas.append(vaga)
+
+        return vagas_formatadas
 
     except Exception as erro:
         print("Erro ao acessar a API:", erro)
