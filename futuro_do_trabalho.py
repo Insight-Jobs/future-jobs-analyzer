@@ -81,28 +81,22 @@ def filtrar_vagas(lista_vagas, termo_filtro):
 
     return vagas_filtradas
 
-# TODO: definir critério de filtro e retornar nova lista
-# Exemplo de lógica:
-# return [p for p in lista_vagas if p["crescimento"] > 5]
 
-    
-
-        
-
-
-
-
-
-def calcular_crescimento_total(profissoes):
+def calcular_crescimento_total(lista_vagas, indice = 0):
     """
     Soma recursivamente a taxa de crescimento
     de todas as profissões da lista.
     """
 
-    # TODO: implementar a lógica recursiva:
-    # - Caso base: quando indice >= len(lista)
-    # - Caso recursivo: valor atual + chamada para o próximo índice
-    pass
+       # Caso base: chegou no fim da lista
+    if indice == len(lista_vagas):
+        return 0
+
+    # Pega o valor de crescimento da vaga atual
+    crescimento_atual = lista_vagas[indice].get("crescimento", 0)
+
+    # Caso recursivo: valor atual + restante da lista
+    return crescimento_atual + calcular_crescimento_total(lista_vagas, indice + 1)
 
 
 
