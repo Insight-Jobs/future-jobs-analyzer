@@ -3,6 +3,7 @@ import json
 from dotenv import load_dotenv
 import http.client
 import os
+import random
 
 load_dotenv()
 
@@ -10,8 +11,8 @@ API_KEY = os.getenv('rapidapi-key')
 API_HOST = os.getenv('rapidapi-host')
 
 headers = {
-    "X-RapidAPI-Key": API_KEY,
-    "X-RapidAPI-Host": API_HOST
+    "x-rapidapi-key": API_KEY,
+    "x-rapidapi-host": API_HOST
 }
 
 
@@ -27,16 +28,17 @@ def obter_tendencias_vagas (termo_busca):
        "query": termo_busca,
         "page": "1",
         "num_pages": "1",
-        "country": "br"
     }
 
     try:
         response = requests.get(url, headers=headers, params=querystring)
-        
+
+        print("Status code:", response.status_code)
+        print("Raw response:", response.text)
 
         dados = response.json()
 
-        lista_vagas = dados["data"]
+        lista_vagas = dados("data",[])
 
         vagas_formatadas = []
 
@@ -49,7 +51,8 @@ def obter_tendencias_vagas (termo_busca):
                  "modalidade": item.get("job_is_remote"),
                  "salario": item.get ("job_salary", "Não informado"),
                  "tipo de carga horaria": item.get("job_employment_type"),
-                 "beneficios": item.get ("Benefits")
+                 "beneficios": item.get ("benefits"),
+                 "crescimento": random.randint(1, 10)  # GERA VALOR PARA A RECURSÃO
             } 
 
             vagas_formatadas.append(vaga)
@@ -88,35 +91,25 @@ def calcular_crescimento_total(lista_vagas, indice = 0):
     de todas as profissões da lista.
     """
 
-       # Caso base: chegou no fim da lista
     if indice == len(lista_vagas):
-        return 0
-
-    # Pega o valor de crescimento da vaga atual
+        return 0 
     crescimento_atual = lista_vagas[indice].get("crescimento", 0)
-
-    # Caso recursivo: valor atual + restante da lista
     return crescimento_atual + calcular_crescimento_total(lista_vagas, indice + 1)
 
 
 
 
-def exibir_vagas(lista_profissoes):
+def exibir_vagas(lista_vagas):
     """
     Exibe, no console, as profissões e suas informações.
     """
 
-    # TODO: usar laço for para imprimir os dados
-    # Exemplo:
-    # for p in lista_profissoes:
-    #     print("Profissão:", p["titulo"])
-    #     print("Empresa:", p["empresa"])
-    #     print("Local:", p["local"])
-    #     print("Crescimento:", p["crescimento"])
-    #     print("-" * 30)
-    pass
-
-
+    for i in lista_vagas:
+        print("Vaga:", i["titulo"])
+        print("Empresa:", i["empresa"])
+        print("Local:", i["local"])
+        print("Crescimento:", i["crescimento"])
+        print("-" * 30)
 
 
 def main ():
@@ -125,7 +118,7 @@ def main ():
     # 1. Obter dados da API
     termo_busca = input("Digite o que deseja buscar (ex: developer, data analyst, nurse): ")
 
-    vagas = obter_tendencias_vagas()
+    vagas = obter_tendencias_vagas(termo_busca)
 
     print(f"\nForam encontradas {len(vagas)} vagas.")
 
