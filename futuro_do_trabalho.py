@@ -1,5 +1,6 @@
 import requests
 import json
+import sys
 from dotenv import load_dotenv
 import random
 import os
@@ -20,7 +21,6 @@ def obter_tendencias_vagas(termo_busca):
     Faz uma requisição para a API JSearch (RapidAPI)
     e retorna uma lista de dicionários padronizados.
     """
-
     url = "https://jsearch.p.rapidapi.com/search"
 
     querystring = {
@@ -46,7 +46,7 @@ def obter_tendencias_vagas(termo_busca):
                 "salario": item.get("job_salary", "Não informado"),
                 "tipo_carga_horaria": item.get("job_employment_type"),
                 "beneficios": item.get("job_benefits"),
-                "crescimento": random.randint(1, 10)  # NECESSÁRIO para a recursão
+                "crescimento": random.randint(1, 10)
             }
 
             vagas_formatadas.append(vaga)
@@ -54,15 +54,13 @@ def obter_tendencias_vagas(termo_busca):
         return vagas_formatadas
 
     except Exception as erro:
-        print("Erro ao acessar a API:", erro)
-        return []
+        return {"erro": str(erro)}
 
 
 def filtrar_vagas(lista_vagas, termo_filtro):
     """
     Filtra vagas com base no termo fornecido pelo usuário.
     """
-
     vagas_filtradas = []
     termo = termo_filtro.lower()
 
@@ -82,7 +80,6 @@ def calcular_crescimento_total(lista_vagas, indice=0):
     Soma recursivamente a taxa de crescimento
     de todas as vagas da lista.
     """
-
     # Caso base
     if indice == len(lista_vagas):
         return 0
@@ -93,38 +90,40 @@ def calcular_crescimento_total(lista_vagas, indice=0):
     return crescimento_atual + calcular_crescimento_total(lista_vagas, indice + 1)
 
 
-def exibir_vagas(lista_vagas):
-    """
-    Exibe cada vaga formatada.
-    """
-
-    for vaga in lista_vagas:
-        print("Vaga:", vaga["titulo"])
-        print("Empresa:", vaga["empresa"])
-        print("Local:", vaga["local"])
-        print("Crescimento:", vaga["crescimento"])
-        print("-" * 30)
-
-
 def main():
-    print("\n=== FUTURO DO TRABALHO - GLOBAL SOLUTION ===\n")
+    # Recebe argumentos da linha de comando
+    if len(sys.argv) < 2:
+        print(json.dumps({"erro": "Termo de busca não fornecido"}))
+        return
 
-    termo_busca = input("Digite o que deseja buscar (ex: developer, data analyst, nurse): ")
+    termo_busca = sys.argv[1]
+    termo_filtro = sys.argv[2] if len(sys.argv) > 2 else ""
 
+    # Busca as vagas
     vagas = obter_tendencias_vagas(termo_busca)
 
-    print(f"\nForam encontradas {len(vagas)} vagas.")
+    # Se houve erro, retorna
+    if isinstance(vagas, dict) and "erro" in vagas:
+        print(json.dumps(vagas))
+        return
 
-    termo_filtro = input("Digite um termo para filtrar os resultados (ou deixe vazio para não filtrar): ")
-
+    # Filtra se necessário
     if termo_filtro.strip() != "":
         vagas = filtrar_vagas(vagas, termo_filtro)
 
-    print(f"\nVagas após filtro: {len(vagas)}\n")
-    exibir_vagas(vagas)
+    # Calcula crescimento total
+    total_crescimento = calcular_crescimento_total(vagas)
 
-    total = calcular_crescimento_total(vagas)
-    print("\nCrescimento total das vagas filtradas:", total)
+    # Retorna resultado em JSON
+    resultado = {
+        "total_vagas": len(vagas),
+        "vagas": vagas,
+        "crescimento_total": total_crescimento,
+        "termo_busca": termo_busca,
+        "termo_filtro": termo_filtro
+    }
+
+    print(json.dumps(resultado))
 
 
 if __name__ == '__main__':
