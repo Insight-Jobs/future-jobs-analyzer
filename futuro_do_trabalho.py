@@ -6,7 +6,7 @@ import random
 import os
 
 load_dotenv()
-
+# Criar um .env conforme dito no README.md 
 API_KEY = os.getenv('rapidapi-key')
 API_HOST = os.getenv('rapidapi-host')
 
