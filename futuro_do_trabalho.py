@@ -45,7 +45,7 @@ def obter_tendencias_vagas(termo_busca):
                 "modalidade": item.get("job_is_remote"),
                 "salario": item.get("job_salary", "Não informado"),
                 "tipo_carga_horaria": item.get("job_employment_type"),
-                "beneficios": item.get("job_benefits"),
+                "beneficios": item.get("job_benefits", []),
                 "crescimento": random.randint(1, 10),
                 "link": item.get ("job_apply_link"),
                 "opcoes_aplicacao": item.get ("apply_options", [])
@@ -125,22 +125,28 @@ def main():
     termo_busca = sys.argv[1]
     termo_filtro = sys.argv[2] if len(sys.argv) > 2 else ""
 
-    # Busca as vagas
+    # 1. Buscar vagas
     vagas = obter_tendencias_vagas(termo_busca)
 
-    # Se houve erro, retorna
+    # Se houve erro na API
     if isinstance(vagas, dict) and "erro" in vagas:
         print(json.dumps(vagas))
         return
 
-    # Filtra se necessário
+    # 2. Exibir todas as vagas
+    print("\n=== VAGAS ENCONTRADAS ===\n")
+    exibir_vagas(vagas)
+
+    # 3. Aplicar filtro, se houver
     if termo_filtro.strip() != "":
         vagas = filtrar_vagas(vagas, termo_filtro)
+        print("\n=== VAGAS APÓS FILTRO ===\n")
+        exibir_vagas(vagas)
 
-    # Calcula crescimento total
+    # 4. Calcular crescimento total
     total_crescimento = calcular_crescimento_total(vagas)
 
-    # Retorna resultado em JSON
+    # 5. Retorno final em JSON
     resultado = {
         "total_vagas": len(vagas),
         "vagas": vagas,
@@ -149,8 +155,8 @@ def main():
         "termo_filtro": termo_filtro
     }
 
-    print(json.dumps(resultado))
-
+    print("\n=== RESULTADO EM JSON ===\n")
+    print(json.dumps(resultado, indent=4))
 
 if __name__ == '__main__':
-    main()
+    main ()
