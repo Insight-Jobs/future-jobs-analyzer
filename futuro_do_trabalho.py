@@ -46,7 +46,9 @@ def obter_tendencias_vagas(termo_busca):
                 "salario": item.get("job_salary", "Não informado"),
                 "tipo_carga_horaria": item.get("job_employment_type"),
                 "beneficios": item.get("job_benefits"),
-                "crescimento": random.randint(1, 10)
+                "crescimento": random.randint(1, 10),
+                "link": item.get ("job_apply_link"),
+                "opcoes_aplicacao": item.get ("apply_options", [])
             }
 
             vagas_formatadas.append(vaga)
@@ -88,6 +90,30 @@ def calcular_crescimento_total(lista_vagas, indice=0):
 
     # Caso recursivo
     return crescimento_atual + calcular_crescimento_total(lista_vagas, indice + 1)
+
+
+def exibir_vagas(lista_vagas):
+    """
+    Exibe cada vaga formatada, incluindo links de aplicação.
+    """
+    for vaga in lista_vagas:
+        print("Vaga:", vaga["titulo"])
+        print("Empresa:", vaga["empresa"])
+        print("Local:", vaga["local"])
+        print("Crescimento:", vaga["crescimento"])
+
+        # 🔹 Link principal de aplicação
+        if vaga.get("link"):
+            print("Aplicar:", vaga["link"])
+
+        # 🔹 Outras opções de aplicação
+        if vaga.get("opcoes_aplicacao"):
+            print("Opções de Aplicação:")
+            for opcao in vaga["opcoes_aplicacao"]:
+                print(f"  - {opcao.get('publisher')}: {opcao.get('apply_link')}")
+
+        print("-" * 40)
+
 
 
 def main():
